@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://java.sun.com/xml/ns/javaee"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+         id="WebApp_ID" version="3.0">
+    <!-- web.xml 的加载顺序是：ServletContext -> context-param -> listener -> filter -> servlet -->
+    <!--项目名称-->
+    <display-name>myshiro project</display-name>
+    <!--项目描述-->
+    <description>about shiro auth</description>
+
+    <!--1、启动Spring 容器参数，一般用于加载出Web 层的Bean（如DAO、Service 等），以便于与其他任何Web框架集成-->
+    <!--创建完毕后会将该上下文放在ServletContext：servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE,this.context);-->
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>
+            classpath*:spring-context.xml
+        </param-value>
+    </context-param>
+    <!--Spring 监听器的配置，用于在启动Web 容器时，自动装配contextConfigLocation 中配置文件的配置信息 -->
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+
+    <!--2、Springmvc 的前端控制器，拦截所有的请求，提供了Spring Web MVC的集中访问点， 而且负责职责的分派-->
+    <!--ContextLoaderListener初始化的上下文加载的Bean是对于整个应用程序共享的，不管是使用什么表示层技术，一般如DAO层、Service层Bean；
+    DispatcherServlet初始化的上下文加载的Bean是只对Spring Web MVC有效的Bean，如Controller、HandlerMapping、HandlerAdapter等等，
+    该初始化上下文应该只加载Web相关组件-->
+    <servlet>
+        <servlet-name>spring-mvc</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <init-param>
+            <param-name>contextConfigLocation</param-name>
+            <param-value>classpath*:spring-mvc.xml</param-value>
+        </init-param>
+        <load-on-startup>0</load-on-startup>
+        <async-supported>true</async-supported>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>spring-mvc</servlet-name>
+        <!-- 此处可以可以配置成 *.do，对应 struts 的后缀习惯，/表示拦截所有请求，以致无法访问静态资源 -->
+        <url-pattern>/</url-pattern>
+    </servlet-mapping>
+
+    <!-- 3、Spring 字符编码过滤器，一定要放到所有过滤器之前-->
+    <filter>
+        <filter-name>SpringEncodingFilter</filter-name>
+        <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+        <async-supported>true</async-supported>
+        <init-param>
+            <param-name>encoding</param-name>
+            <param-value>UTF-8</param-value>
+        </init-param>
+        <init-param>
+            <param-name>forceEncoding</param-name>
+            <param-value>true</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>SpringEncodingFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    <!--使用rest 风格的URI，将页面普通的post 请求转为delete 或者 put 请求-->
+    <filter>
+        <filter-name>HiddenHttpMethodFilter</filter-name>
+        <filter-class>org.springframework.web.filter.HiddenHttpMethodFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>HiddenHttpMethodFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+</web-app>

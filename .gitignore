@@ -1,6 +1,5 @@
 target/
 .idea/
-*.war
 # Compiled class file
 *.class
 
